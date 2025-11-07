@@ -1,4 +1,5 @@
 name: CI/CD — Build, Push, Minikube Deploy
+
 on:
   push:
     branches: [ main ]
@@ -41,49 +42,36 @@ jobs:
           sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
           kubectl version --client
 
-      # Step 6: Install Minikube dependencies
-      - name: Install Minikube dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y conntrack curl wget
-          # Install crictl (required by newer Kubernetes versions)
-          VERSION="v1.30.0"
-          wget https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-$VERSION-linux-amd64.tar.gz
-          sudo tar zxvf crictl-$VERSION-linux-amd64.tar.gz -C /usr/local/bin
-          rm -f crictl-$VERSION-linux-amd64.tar.gz
-
-      # Step 7: Install and start Minikube
+      # Step 6: Install and start Minikube (Docker driver)
       - name: Install and start Minikube
         run: |
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
           sudo install minikube-linux-amd64 /usr/local/bin/minikube
           minikube version
-          # Use the none driver with force to avoid Docker root issues
-          sudo minikube start --driver=none --force --memory=4096 --cpus=2
-          sudo chown -R $USER ~/.kube ~/.minikube
+          minikube start --driver=docker --memory=4096 --cpus=2
           minikube status
 
-      # Step 8: Enable Ingress
+      # Step 7: Enable Ingress addon
       - name: Enable Ingress addon
         run: |
           minikube addons enable ingress
           kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx -n kube-system --timeout=120s || true
           kubectl get pods -n kube-system -o wide
 
-      # Step 9: Update deployment image
+      # Step 8: Update deployment image
       - name: Update deployment image
         run: |
           echo "Updating k8s/deployment.yaml to use image: $IMAGE_NAME:latest"
           sed -i "s|image: .*|image: $IMAGE_NAME:latest|" k8s/deployment.yaml
           cat k8s/deployment.yaml
 
-      # Step 10: Deploy to Minikube
+      # Step 9: Deploy to Minikube
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/
-          kubectl rollout status deployment/deployment --timeout=120s
+          kubectl rollout status deployment/wisecow-deployment --timeout=120s
 
-      # Step 11: Minimal Smoke Test
+      # Step 10: Minimal Smoke Test
       - name: Smoke Test Deployment
         run: |
           echo "Performing minimal smoke test..."
@@ -93,9 +81,8 @@ jobs:
           kubectl get pods | grep wisecow-deployment || exit 1
           echo "✅ Wisecow deployment appears healthy."
 
-      # Step 12: Cleanup (Optional)
+      # Step 11: Cleanup Minikube (optional)
       - name: Clean up Minikube
         if: always()
         run: |
           minikube delete || true
-
