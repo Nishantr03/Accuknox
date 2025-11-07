@@ -55,7 +55,7 @@ jobs:
       - name: Enable Ingress addon
         run: |
           minikube addons enable ingress
-          kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx -n kube-system --timeout=120s || true
+          kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx -n kube-system --timeout=180s || true
           kubectl get pods -n kube-system -o wide
 
       # Step 8: Update deployment image
