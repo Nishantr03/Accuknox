@@ -32,7 +32,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.IMAGE NAME}}:latest
+            ${{ env.IMAGE_NAME}}:latest
 
       # Step 5: Install kubectl
       - name: Install kubectl
