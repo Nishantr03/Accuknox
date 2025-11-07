@@ -63,7 +63,8 @@ jobs:
       # Step 9: Wait for ingress controller pods to be ready
       - name: Wait for ingress controller pods ready
         run: |
-          kubectl wait --namespace kube-system --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx --timeout=180s
+          kubectl wait --namespace ingress-nginx --for=condition=Ready pod -l app.kubernetes.io/name=ingress-nginx --timeout=180s
+
 
       # Step 10: (Optional) Disable ingress validating webhooks to avoid webhook errors
       - name: Disable ingress validating webhooks (optional)
