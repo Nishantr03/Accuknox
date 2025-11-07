@@ -32,7 +32,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.wisecow}}:latest
+            ${{ env.IMAGE NAME}}:latest
 
       # Step 5: Install kubectl
       - name: Install kubectl
@@ -68,7 +68,7 @@ jobs:
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/
-          kubectl rollout status deployment/wisecow-deployment --timeout=120s
+          kubectl rollout status deployment/deployment --timeout=120s
 
       # Step 10: Minimal Smoke Test
       - name: Smoke Test Deployment
