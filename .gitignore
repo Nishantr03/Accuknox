@@ -1,0 +1,8 @@
+# Ignore binaries, certs, IDE configs, etc.
+minikube-linux-amd64
+tls/*.crt
+tls/*.csr
+tls/*.key
+.idea/
+*.log
+*.tmp
